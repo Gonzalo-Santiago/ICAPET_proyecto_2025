@@ -35,9 +35,9 @@ export default function InstructorFinder() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-center text-3xl font-bold text-blue-600 mb-2">Instructor Finder</h1>
+      <h1 className="text-center text-3xl font-bold text-blue-600 mb-2">Filtro de Instructores</h1>
       <p className="text-center text-gray-500 mb-6">
-        Encuentra instructores calificados fácilmente. Utiliza los filtros para refinar tu búsqueda
+        Utiliza los filtros para refinar tu búsqueda
         por sector o especialidad.
       </p>
 
@@ -69,7 +69,16 @@ export default function InstructorFinder() {
             <option key={i}>{esp}</option>
           ))}
         </select>
+
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={() => window.location.href = "/admin"}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+            Ir al Panel de Administración
+          </button>
+        </div>
       </div>
+
 
       {/* Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
