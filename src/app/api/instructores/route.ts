@@ -1,77 +1,80 @@
-// src/app/api/instructores/route.ts
-import { NextResponse } from "next/server";
+
+// /src/app/api/instructores/route.ts
 import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
 
-// GET: listar instructores
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const [rows]: any = await db.query(`
-      SELECT 
-        p.id_persona AS id,
-        p.nombre_completo AS nombre,
-        p.rfc,
-        p.contacto AS tel,
-        p.udc,
-        p.nivel_maximo_estudios AS estudios,
-        GROUP_CONCAT(DISTINCT s.nombre_sector) AS sectores,
-        GROUP_CONCAT(DISTINCT e.nombre_especialidad) AS especialidades
-      FROM Personas p
-      LEFT JOIN Personas_Sectores ps ON p.id_persona = ps.id_persona
-      LEFT JOIN Sectores s ON ps.id_sector = s.id_sector
-      LEFT JOIN Personas_Especialidades pe ON p.id_persona = pe.id_persona
-      LEFT JOIN Especialidades e ON pe.id_especialidad = e.id_especialidad
-      GROUP BY p.id_persona
-    `);
+    const { searchParams } = new URL(req.url);
+    const nombre = searchParams.get("nombre") || "";
+    const campo_formacion = searchParams.get("campo_formacion") || "Todos los campos";
+    const especialidad = searchParams.get("especialidad") || "Todas las especialidades";
+    const curso = searchParams.get("curso") || "Todos los cursos";
 
-    const formatted = rows.map((row: any) => ({
+    let query = `
+            SELECT
+                I.id,
+                I.nombre,
+                I.apellido_paterno,
+                I.apellido_materno,
+                CONCAT_WS(' ', I.nombre, I.apellido_paterno, I.apellido_materno) AS nombre_completo,
+                GROUP_CONCAT(DISTINCT S.campo_formacion) AS campos_formacion,
+                GROUP_CONCAT(DISTINCT S.especialidad) AS especialidades,
+                GROUP_CONCAT(DISTINCT S.curso) AS cursos
+            FROM INSTRUCTORES I
+            LEFT JOIN INSTRUCTOR_SECTOR ISX ON I.id = ISX.id_instructor
+            LEFT JOIN SECTOR S ON ISX.id_sector = S.id
+        `;
+
+    const conditions = [];
+    const values = [];
+
+    if (nombre) {
+      conditions.push("CONCAT_WS(' ', I.nombre, I.apellido_paterno, I.apellido_materno) LIKE ?");
+      values.push(`%${nombre}%`);
+    }
+
+    if (campo_formacion !== "Todos los campos") {
+      conditions.push("S.campo_formacion = ?");
+      values.push(campo_formacion);
+    }
+
+    if (especialidad !== "Todas las especialidades") {
+      conditions.push("S.especialidad = ?");
+      values.push(especialidad);
+    }
+
+    if (curso !== "Todos los cursos") {
+      conditions.push("S.curso = ?");
+      values.push(curso);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " GROUP BY I.id";
+
+    const [rows] = await db.query(query, values);
+
+    if (!rows) {
+      return NextResponse.json([]);
+    }
+
+    // Format the data to match the frontend component's expectations
+    const formattedInstructores = (rows as any[]).map(row => ({
       ...row,
-      sectores: row.sectores ? row.sectores.split(",") : [],
-      especialidades: row.especialidades ? row.especialidades.split(",") : [],
+      sectores: [{
+        campo_formacion: row.campos_formacion ? row.campos_formacion.split(',')[0] : null,
+        especialidad: row.especialidades ? row.especialidades.split(',')[0] : null,
+        curso: row.cursos ? row.cursos.split(',')[0] : null
+      }]
     }));
 
-    return NextResponse.json(formatted);
-  } catch (error) {
-    return NextResponse.json({ error: "Error en GET" }, { status: 500 });
-  }
-}
+    return NextResponse.json(formattedInstructores);
 
-// POST: agregar nuevo instructor
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const {
-      nombre,
-      rfc,
-      tel,
-      udc,
-      estudios,
-      sectores = [],
-      especialidades = [],
-    } = body;
-
-    const [result]: any = await db.query(
-      `INSERT INTO Personas (nombre_completo, rfc, contacto, udc, nivel_maximo_estudios)
-       VALUES (?, ?, ?, ?, ?)`,
-      [nombre, rfc, tel, udc, estudios]
-    );
-
-    const id = result.insertId;
-
-    for (const sector of sectores) {
-      const [sectorRow]: any = await db.query(`SELECT id_sector FROM Sectores WHERE nombre_sector = ?`, [sector]);
-      if (sectorRow.length)
-        await db.query(`INSERT INTO Personas_Sectores (id_persona, id_sector) VALUES (?, ?)`, [id, sectorRow[0].id_sector]);
-    }
-
-    for (const esp of especialidades) {
-      const [espRow]: any = await db.query(`SELECT id_especialidad FROM Especialidades WHERE nombre_especialidad = ?`, [esp]);
-      if (espRow.length)
-        await db.query(`INSERT INTO Personas_Especialidades (id_persona, id_especialidad) VALUES (?, ?)`, [id, espRow[0].id_especialidad]);
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error en POST" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Error en GET /api/instructores:", error.message);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

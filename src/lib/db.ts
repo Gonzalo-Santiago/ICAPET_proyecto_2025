@@ -5,5 +5,5 @@ export const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '6011',
-    database: 'incapet',
+    database: 'icapet',
 });

@@ -1,55 +1,55 @@
-// src/app/api/instructores/[id]/route.ts
+
+
+
+// /src/app/api/instructores/[id]/route.ts
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  try {
-    const id = params.id;
-    const {
-      nombre,
-      rfc,
-      tel,
-      udc,
-      estudios,
-      sectores = [],
-      especialidades = [],
-    } = await req.json();
+export async function GET(req: Request, context: { params: { id: string } }) {
+    try {
+        const { id: instructorId } = await context.params;
 
-    await db.query(
-      `UPDATE Personas SET nombre_completo = ?, rfc = ?, contacto = ?, udc = ?, nivel_maximo_estudios = ? WHERE id_persona = ?`,
-      [nombre, rfc, tel, udc, estudios, id]
-    );
+        if (!instructorId) {
+            return NextResponse.json({ error: "ID de instructor no proporcionado" }, { status: 400 });
+        }
 
-    await db.query(`DELETE FROM Personas_Sectores WHERE id_persona = ?`, [id]);
-    await db.query(`DELETE FROM Personas_Especialidades WHERE id_persona = ?`, [id]);
+        const query = `
+      SELECT
+        I.*,
+        I.comentario AS descripcion,
+        CONCAT_WS(' ', I.nombre, I.apellido_paterno, I.apellido_materno) AS nombre_completo,
+        I.telefono AS contacto,
+        I.nivel_estudio AS nivel_maximo_estudios,
+        I.RFC AS rfc_base64,
+        I.CEDULA AS cedula_base64,
+        I.INE AS ine_base64,
+        I.FOTOGRAFIA AS fotografia_base64,
+        I.CURP AS curp_base64,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'campo_formacion', S.campo_formacion,
+            'especialidad', S.especialidad,
+            'curso', S.curso
+          )
+        ) AS sectores
+      FROM INSTRUCTORES I
+      LEFT JOIN INSTRUCTOR_SECTOR ISX ON I.id = ISX.id_instructor
+      LEFT JOIN SECTOR S ON ISX.id_sector = S.id
+      WHERE I.id = ?
+      GROUP BY I.id
+    `;
+        const [rows] = await db.query(query, [instructorId]);
 
-    for (const sector of sectores) {
-      const [sectorRow]: any = await db.query(`SELECT id_sector FROM Sectores WHERE nombre_sector = ?`, [sector]);
-      if (sectorRow.length)
-        await db.query(`INSERT INTO Personas_Sectores (id_persona, id_sector) VALUES (?, ?)`, [id, sectorRow[0].id_sector]);
+        if (!rows || (rows as any[]).length === 0) {
+            return NextResponse.json({ error: "Instructor no encontrado" }, { status: 404 });
+        }
+
+        const instructor = (rows as any[])[0];
+        const formattedSectores = instructor.sectores && instructor.sectores[0]?.campo_formacion ? instructor.sectores : [];
+
+        return NextResponse.json({ ...instructor, sectores: formattedSectores });
+    } catch (error: any) {
+        console.error("Error en GET /api/instructores/[id]:", error.message);
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
-
-    for (const esp of especialidades) {
-      const [espRow]: any = await db.query(`SELECT id_especialidad FROM Especialidades WHERE nombre_especialidad = ?`, [esp]);
-      if (espRow.length)
-        await db.query(`INSERT INTO Personas_Especialidades (id_persona, id_especialidad) VALUES (?, ?)`, [id, espRow[0].id_especialidad]);
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error en PUT" }, { status: 500 });
-  }
-}
-
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  try {
-    const id = params.id;
-    await db.query(`DELETE FROM Personas_Sectores WHERE id_persona = ?`, [id]);
-    await db.query(`DELETE FROM Personas_Especialidades WHERE id_persona = ?`, [id]);
-    await db.query(`DELETE FROM Personas WHERE id_persona = ?`, [id]);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Error en DELETE" }, { status: 500 });
-  }
 }
