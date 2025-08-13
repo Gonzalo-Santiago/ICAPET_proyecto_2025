@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider = "prisma-client-js"
+//  output   = "../src/generated/prisma"
+// }
+
+// datasource db {
+//  provider = "postgresql"
+//  url      = env("DATABASE_URL")
+// }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusInstructor {
+  Experto_Impirico
+  Experto_con_educacion_NO_formal
+  Experto_con_Educacion_formal
+  Licenciatura
+  Maestria
+  Doctorado
+  Instructor_en_Territorios_Bienestar
+  Capacitador_de_cursos_Mujeres_Transformando_su_Futuro
+}
+
+model instructores {
+  id               Int                  @id @default(autoincrement())
+  nombre           String
+  apellido_paterno String
+  apellido_materno String
+  email            String
+  telefono         String
+  nivel_estudio    String
+  area_estudio     String
+  UDC              String
+  residencia       String
+  comentario       String?
+  rfc              String?
+  curp             String?
+  cedula           String?
+  ine              String?
+  fotografia       String?
+
+  sectores         sectores_instructor[]
+}
+
+model sectores {
+  id              Int                  @id @default(autoincrement())
+  campo_formacion String
+  especialidad    String
+  curso           String
+  instructores    sectores_instructor[]
+}
+
+model sectores_instructor {
+  id            Int               @id @default(autoincrement())
+  instructor_id Int
+  sector_id     Int
+  status        StatusInstructor  @default(Experto_Impirico)
+
+  instructor    instructores @relation(fields: [instructor_id], references: [id])
+  sector        sectores     @relation(fields: [sector_id], references: [id])
+}
