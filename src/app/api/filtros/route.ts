@@ -1,3 +1,7 @@
+/**Programador: Gonzalo Santiago Garcia
+ * Fecha: 13/08/2025
+ * Descripcion: Se encarga de filtrar los datos del instructor
+ */
 
 
 // /src/app/api/filtros/route.ts
