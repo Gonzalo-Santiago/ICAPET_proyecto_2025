@@ -5,19 +5,13 @@ import { useEffect, useState } from "react";
 import {
   Search,
   Building2,
-  User,
   Phone,
   Mail,
   MapPin,
   School,
   GraduationCap,
   Download,
-  FileText,
-  ChevronDown,
   ChevronRight,
-  BookOpen,
-  UserPlus,
-  Edit,
 } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
@@ -127,15 +121,12 @@ export default function InstructorDirectoryUI() {
         {/* Header con filtros */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-            {/* Título y icono */}
             <div className="flex items-center gap-3">
               <Building2 className="w-8 h-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-800">Filtro de Instructores</h1>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Buscar por Nombre */}
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-gray-700 mb-2">
                 Buscar por Nombre
@@ -152,7 +143,6 @@ export default function InstructorDirectoryUI() {
                 />
               </div>
             </div>
-            {/* Campo de Formación */}
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-gray-700 mb-2">
                 Campo de Formación
@@ -169,7 +159,6 @@ export default function InstructorDirectoryUI() {
                 ))}
               </select>
             </div>
-            {/* Especialidad */}
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-gray-700 mb-2">
                 Especialidad
@@ -187,7 +176,6 @@ export default function InstructorDirectoryUI() {
                 ))}
               </select>
             </div>
-            {/* Curso */}
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-gray-700 mb-2">Curso</label>
               <select
@@ -211,7 +199,7 @@ export default function InstructorDirectoryUI() {
           {/* Columna de la izquierda: Listado de instructores */}
           <div className="bg-white p-6 rounded-lg shadow-md col-span-1">
             <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Instructores ({instructores.length})
+              Total de Instructores ({instructores.length})
             </h2>
             <div className="space-y-4">
               {instructores.length === 0 ? (
@@ -236,8 +224,6 @@ export default function InstructorDirectoryUI() {
               )}
             </div>
           </div>
-
-          {/* Columna de la derecha: Detalles del instructor seleccionado */}
           <div className="bg-white p-6 rounded-lg shadow-md col-span-2">
             {instructorSeleccionado ? (
               <InstructorDetailView instructor={instructorSeleccionado} />
@@ -266,24 +252,13 @@ const InstructorListItem = ({ instructor }: { instructor: any }) => {
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center">
-        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-          {getInitials(instructor.nombre_completo)}
-        </div>
-        <div className="ml-4">
-          <h3 className="font-semibold text-gray-800">{instructor.nombre_completo}</h3>
-          {instructor.sectores?.length > 0 && instructor.sectores[0]?.campo_formacion && (
-            <p className="text-sm text-gray-500">{instructor.sectores[0].campo_formacion}</p>
-          )}
-        </div>
+    <div className="flex items-center">
+      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
+        {getInitials(instructor.nombre_completo)}
       </div>
-      {/* LÍNEA MODIFICADA para mostrar el status en un badge con color dinámico */}
-      {instructor.sectores?.length > 0 && instructor.sectores[0]?.status && (
-        <span className={clsx("text-xs font-semibold px-2 py-1 rounded-full", getStatusColorClass(instructor.sectores[0].status))}>
-          {instructor.sectores[0].status}
-        </span>
-      )}
+      <div className="ml-4">
+        <h3 className="font-semibold text-gray-800">{instructor.nombre_completo}</h3>
+      </div>
     </div>
   );
 };
@@ -300,19 +275,19 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
     return initials.toUpperCase();
   };
 
-  // Función para agrupar los cursos por campo de formación y especialidad
-  const agruparCursos = (sectores: any[]) => {
+  // Función para agrupar los cursos por campo de formación y especialidad, incluyendo el status
+  const agruparCursosConStatus = (sectores: any[]) => {
     if (!sectores || sectores.length === 0 || sectores[0]?.campo_formacion === null) return {};
     return sectores.reduce((acc, sector) => {
-      const { campo_formacion, especialidad, curso } = sector;
+      const { campo_formacion, especialidad, curso, status } = sector;
       if (!acc[campo_formacion]) acc[campo_formacion] = {};
       if (!acc[campo_formacion][especialidad]) acc[campo_formacion][especialidad] = [];
-      acc[campo_formacion][especialidad].push(curso);
+      acc[campo_formacion][especialidad].push({ curso, status });
       return acc;
     }, {});
   };
 
-  const cursosAgrupados = agruparCursos(instructor.sectores);
+  const cursosAgrupados = agruparCursosConStatus(instructor.sectores);
 
   return (
     <div>
@@ -321,12 +296,6 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
           {getInitials(instructor.nombre_completo)}
         </div>
         <h3 className="text-2xl font-bold text-gray-800">{instructor.nombre_completo}</h3>
-        {/* Aquí se muestra el status en la vista de detalles del instructor con color dinámico */}
-        {instructor.sectores?.length > 0 && instructor.sectores[0]?.status && (
-          <p className={clsx("text-lg font-semibold", getStatusColorClass(instructor.sectores[0].status))}>
-            {instructor.sectores[0].status}
-          </p>
-        )}
       </div>
       <div className="space-y-6">
         {/* 1. Información de Contacto */}
@@ -380,9 +349,15 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
                           {esp}
                         </summary>
                         <ul className="list-inside ml-6 mt-1 text-sm text-gray-600">
-                          {cursos.map((curso: string, idx: number) => (
-                            <li key={idx} className="my-1">
-                              <span>{curso}</span>
+                          {cursos.map((item: any, idx: number) => (
+                            <li key={idx} className="flex justify-between items-center my-1">
+                              <span>{item.curso}</span>
+                              {/* Muestra el status del curso en un badge con color dinámico */}
+                              {item.status && (
+                                <span className={clsx("text-xs font-semibold px-2 py-1 rounded-full", getStatusColorClass(item.status))}>
+                                  {item.status}
+                                </span>
+                              )}
                             </li>
                           ))}
                         </ul>
