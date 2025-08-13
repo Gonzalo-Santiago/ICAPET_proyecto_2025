@@ -19,14 +19,14 @@ import { useRouter } from "next/navigation";
 // Función auxiliar para asignar colores basados en el status
 const getStatusColorClass = (status: string) => {
   switch (status) {
-    case 'Maestría':
-      return 'bg-green-100 text-green-800';
-    case 'Doctorado':
-      return 'bg-purple-100 text-purple-800';
-    case 'Licenciatura':
-      return 'bg-yellow-100 text-yellow-800';
+    case "Maestría":
+      return "bg-green-200 text-green-900";
+    case "Doctorado":
+      return "bg-purple-200 text-purple-900";
+    case "Licenciatura":
+      return "bg-yellow-200 text-yellow-900";
     default:
-      return 'bg-blue-100 text-blue-800'; // Color por defecto para otros status
+      return "bg-blue-200 text-blue-900";
   }
 };
 
@@ -44,11 +44,9 @@ export default function InstructorDirectoryUI() {
     especialidad: [] as string[],
     curso: [] as string[],
   });
-  const [instructorSeleccionado, setInstructorSeleccionado] = useState<any | null>(
-    null
-  );
+  const [instructorSeleccionado, setInstructorSeleccionado] = useState<any | null>(null);
 
-  // Efecto para cargar los instructores cuando cambian los filtros
+  // Efecto para cargar instructores
   useEffect(() => {
     const fetchInstructores = async () => {
       const params = new URLSearchParams(filtros as any);
@@ -64,7 +62,7 @@ export default function InstructorDirectoryUI() {
     fetchInstructores();
   }, [filtros]);
 
-  // Efecto para cargar las opciones de filtro
+  // Efecto para cargar opciones de filtro
   useEffect(() => {
     const fetchOpciones = async () => {
       const params = new URLSearchParams();
@@ -87,12 +85,10 @@ export default function InstructorDirectoryUI() {
   }, [filtros.campo_formacion, filtros.especialidad]);
 
   // Manejador de cambios en los filtros
-  const handleFiltroChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-  ) => {
+  const handleFiltroChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFiltros((prevFiltros) => {
-      const newFiltros = { ...prevFiltros, [name]: value };
+    setFiltros((prev) => {
+      const newFiltros = { ...prev, [name]: value };
       if (name === "campo_formacion") {
         newFiltros.especialidad = "Todas las especialidades";
         newFiltros.curso = "Todos los cursos";
@@ -103,9 +99,8 @@ export default function InstructorDirectoryUI() {
     });
   };
 
-  // Maneja el clic en un instructor para cargar sus detalles
-  const handleSeleccionarInstructor = async (instructorId: number) => {
-    const res = await fetch(`/api/instructores/${instructorId}`);
+  const handleSeleccionarInstructor = async (id: number) => {
+    const res = await fetch(`/api/instructores/${id}`);
     if (res.ok) {
       const data = await res.json();
       setInstructorSeleccionado(data);
@@ -116,115 +111,84 @@ export default function InstructorDirectoryUI() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header con filtros */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Building2 className="w-8 h-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-800">Filtro de Instructores</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Filtro de Instructores</h1>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-2">
-                Buscar por Nombre
-              </label>
-              <div className="flex items-center border rounded px-2 bg-gray-50">
-                <Search className="mr-2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  name="nombre"
-                  placeholder="E.g. Juan Pérez..."
-                  className="w-full p-2 outline-none bg-transparent"
-                  value={filtros.nombre}
-                  onChange={handleFiltroChange}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-2">
-                Campo de Formación
-              </label>
-              <select
-                name="campo_formacion"
-                value={filtros.campo_formacion}
-                onChange={handleFiltroChange}
-                className="p-2 border rounded bg-gray-50"
-              >
-                <option>Todos los campos</option>
-                {opciones.campo_formacion.map((campo, idx) => (
-                  <option key={idx}>{campo}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-2">
-                Especialidad
-              </label>
-              <select
-                name="especialidad"
-                value={filtros.especialidad}
-                onChange={handleFiltroChange}
-                className="p-2 border rounded bg-gray-50"
-                disabled={filtros.campo_formacion === "Todos los campos"}
-              >
-                <option>Todas las especialidades</option>
-                {opciones.especialidad.map((esp, idx) => (
-                  <option key={idx}>{esp}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold text-gray-700 mb-2">Curso</label>
-              <select
-                name="curso"
-                value={filtros.curso}
-                onChange={handleFiltroChange}
-                className="p-2 border rounded bg-gray-50"
-                disabled={filtros.especialidad === "Todas las especialidades"}
-              >
-                <option>Todos los cursos</option>
-                {opciones.curso.map((curso, idx) => (
-                  <option key={idx}>{curso}</option>
-                ))}
-              </select>
-            </div>
+            <FiltroInput
+              icon={<Search className="w-4 h-4 text-gray-400" />}
+              label="Buscar por Nombre"
+              name="nombre"
+              value={filtros.nombre}
+              onChange={handleFiltroChange}
+              placeholder="E.g. Juan Pérez..."
+            />
+            <FiltroSelect
+              label="Campo de Formación"
+              name="campo_formacion"
+              value={filtros.campo_formacion}
+              onChange={handleFiltroChange}
+              options={["Todos los campos", ...opciones.campo_formacion]}
+            />
+            <FiltroSelect
+              label="Especialidad"
+              name="especialidad"
+              value={filtros.especialidad}
+              onChange={handleFiltroChange}
+              disabled={filtros.campo_formacion === "Todos los campos"}
+              options={["Todas las especialidades", ...opciones.especialidad]}
+            />
+            <FiltroSelect
+              label="Curso"
+              name="curso"
+              value={filtros.curso}
+              onChange={handleFiltroChange}
+              disabled={filtros.especialidad === "Todas las especialidades"}
+              options={["Todos los cursos", ...opciones.curso]}
+            />
           </div>
         </div>
 
-        {/* Contenedor principal del listado y detalles */}
+        {/* Contenido principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna de la izquierda: Listado de instructores */}
-          <div className="bg-white p-6 rounded-lg shadow-md col-span-1">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
+          {/* Lista de instructores */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
               Total de Instructores ({instructores.length})
             </h2>
             <div className="space-y-4">
               {instructores.length === 0 ? (
-                <div className="text-center text-gray-400 italic">
+                <p className="text-center text-gray-400 italic">
                   No se encontraron instructores.
-                </div>
+                </p>
               ) : (
-                instructores.map((instructor) => (
+                instructores.map((inst) => (
                   <button
-                    key={instructor.id}
-                    onClick={() => handleSeleccionarInstructor(instructor.id)}
+                    key={inst.id}
+                    onClick={() => handleSeleccionarInstructor(inst.id)}
                     className={clsx(
-                      "w-full text-left p-4 rounded-lg shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      instructorSeleccionado?.id === instructor.id
-                        ? "bg-blue-50 border border-blue-500"
-                        : "bg-white border border-gray-200"
+                      "w-full text-left p-4 rounded-xl shadow-sm border transition-all hover:shadow-md hover:scale-[1.01]",
+                      instructorSeleccionado?.id === inst.id
+                        ? "bg-blue-50 border-blue-400"
+                        : "bg-white border-gray-200"
                     )}
                   >
-                    <InstructorListItem instructor={instructor} />
+                    <InstructorListItem instructor={inst} />
                   </button>
                 ))
               )}
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md col-span-2">
+
+          {/* Detalles */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 lg:col-span-2">
             {instructorSeleccionado ? (
               <InstructorDetailView instructor={instructorSeleccionado} />
             ) : (
@@ -239,170 +203,177 @@ export default function InstructorDirectoryUI() {
   );
 }
 
-// Sub-componente para cada item del listado
-const InstructorListItem = ({ instructor }: { instructor: any }) => {
-  const getInitials = (fullName: string) => {
-    if (!fullName) return "JP";
-    const names = fullName.split(" ");
-    let initials = names[0].charAt(0);
-    if (names.length > 1) {
-      initials += names[1].charAt(0);
-    }
-    return initials.toUpperCase();
-  };
+// Componentes auxiliares para filtros
+const FiltroInput = ({ icon, label, ...props }: any) => (
+  <div className="flex flex-col">
+    <label className="text-sm font-semibold text-gray-700 mb-1">{label}</label>
+    <div className="flex items-center border border-gray-200 rounded-full px-3 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-400 transition">
+      {icon}
+      <input className="w-full p-2 bg-transparent outline-none" {...props} />
+    </div>
+  </div>
+);
 
+const FiltroSelect = ({ label, options, ...props }: any) => (
+  <div className="flex flex-col">
+    <label className="text-sm font-semibold text-gray-700 mb-1">{label}</label>
+    <select
+      className="p-2 border border-gray-200 rounded-full bg-gray-50 focus:ring-2 focus:ring-blue-400 transition"
+      {...props}
+    >
+      {options.map((opt: string, idx: number) => (
+        <option key={idx}>{opt}</option>
+      ))}
+    </select>
+  </div>
+);
+
+// Lista
+const InstructorListItem = ({ instructor }: { instructor: any }) => {
+  const getInitials = (name: string) => {
+    if (!name) return "NA";
+    const parts = name.split(" ");
+    return parts.slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+  };
   return (
     <div className="flex items-center">
-      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
+      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
         {getInitials(instructor.nombre_completo)}
       </div>
       <div className="ml-4">
-        <h3 className="font-semibold text-gray-800">{instructor.nombre_completo}</h3>
+        <h3 className="font-semibold text-gray-900">{instructor.nombre_completo}</h3>
       </div>
     </div>
   );
 };
 
-// Sub-componente para la vista de detalles
+// Detalles
 const InstructorDetailView = ({ instructor }: { instructor: any }) => {
-  const getInitials = (fullName: string) => {
-    if (!fullName) return "JP";
-    const names = fullName.split(" ");
-    let initials = names[0].charAt(0);
-    if (names.length > 1) {
-      initials += names[1].charAt(0);
-    }
-    return initials.toUpperCase();
+  const getInitials = (name: string) => {
+    if (!name) return "NA";
+    const parts = name.split(" ");
+    return parts.slice(0, 2).map((p) => p[0]).join("").toUpperCase();
   };
-
-  // Función para agrupar los cursos por campo de formación y especialidad, incluyendo el status
-  const agruparCursosConStatus = (sectores: any[]) => {
-    if (!sectores || sectores.length === 0 || sectores[0]?.campo_formacion === null) return {};
-    return sectores.reduce((acc, sector) => {
-      const { campo_formacion, especialidad, curso, status } = sector;
-      if (!acc[campo_formacion]) acc[campo_formacion] = {};
-      if (!acc[campo_formacion][especialidad]) acc[campo_formacion][especialidad] = [];
+  const agruparCursos = (sectores: any[]) => {
+    if (!sectores?.length || sectores[0]?.campo_formacion === null) return {};
+    return sectores.reduce((acc, s) => {
+      const { campo_formacion, especialidad, curso, status } = s;
+      acc[campo_formacion] ??= {};
+      acc[campo_formacion][especialidad] ??= [];
       acc[campo_formacion][especialidad].push({ curso, status });
       return acc;
-    }, {});
+    }, {} as Record<string, Record<string, any[]>>);
   };
-
-  const cursosAgrupados = agruparCursosConStatus(instructor.sectores);
+  const cursosAgrupados = agruparCursos(instructor.sectores);
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Encabezado */}
       <div className="flex flex-col items-center mb-6">
-        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-3xl font-bold mb-4">
+        <div className="w-24 h-24 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-3xl font-bold mb-4">
           {getInitials(instructor.nombre_completo)}
         </div>
-        <h3 className="text-2xl font-bold text-gray-800">{instructor.nombre_completo}</h3>
+        <h3 className="text-2xl font-bold text-gray-900">{instructor.nombre_completo}</h3>
       </div>
-      <div className="space-y-6">
-        {/* 1. Información de Contacto */}
-        <div>
-          <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Información de Contacto</h4>
-          <div className="flex items-center text-gray-700">
-            <Building2 className="w-5 h-5 mr-2 text-gray-500" />
-            <span className="font-semibold">UDC:</span> {instructor.UDC}
+
+      {/* Información de contacto */}
+      <Section title="Información de Contacto">
+        <InfoItem icon={<Building2 />} label="UDC" value={instructor.UDC} />
+        <InfoItem icon={<Mail />} value={instructor.email} />
+        <InfoItem icon={<Phone />} value={instructor.contacto} />
+        <InfoItem icon={<MapPin />} value={instructor.residencia} />
+      </Section>
+
+      {/* Académica */}
+      <Section title="Información Académica">
+        <InfoItem icon={<School />} label="Nivel" value={instructor.nivel_maximo_estudios} />
+        <InfoItem icon={<GraduationCap />} label="Área" value={instructor.area_estudio} />
+      </Section>
+
+      {/* Cursos */}
+      <Section title="Cursos que Imparte">
+        {Object.keys(cursosAgrupados).length > 0 ? (
+          <div className="space-y-4">
+            {Object.entries(cursosAgrupados).map(([campo, especialidades]) => (
+              <details key={campo} className="bg-gray-50 p-4 rounded-lg">
+                <summary className="flex items-center font-semibold text-gray-800 cursor-pointer">
+                  <ChevronRight className="w-5 h-5 mr-2" /> {campo}
+                </summary>
+                <div className="ml-6 mt-2 space-y-2">
+                  {Object.entries(especialidades).map(([esp, cursos]) => (
+                    <details key={esp} className="p-2 rounded-lg">
+                      <summary className="flex items-center text-gray-700 cursor-pointer">
+                        <ChevronRight className="w-4 h-4 mr-2" /> {esp}
+                      </summary>
+                      <ul className="ml-6 mt-1 text-sm text-gray-600">
+                        {cursos.map((c, idx) => (
+                          <li key={idx} className="flex justify-between items-center my-1">
+                            <span>{c.curso}</span>
+                            {c.status && (
+                              <span
+                                className={clsx(
+                                  "text-xs font-semibold px-2 py-1 rounded-full",
+                                  getStatusColorClass(c.status)
+                                )}
+                              >
+                                {c.status}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  ))}
+                </div>
+              </details>
+            ))}
           </div>
-          <div className="flex items-center text-gray-700">
-            <Mail className="w-5 h-5 mr-2 text-gray-500" />
-            <span>{instructor.email}</span>
-          </div>
-          <div className="flex items-center text-gray-700">
-            <Phone className="w-5 h-5 mr-2 text-gray-500" />
-            <span>{instructor.contacto}</span>
-          </div>
-          <div className="flex items-center text-gray-700">
-            <MapPin className="w-5 h-5 mr-2 text-gray-500" />
-            <span>{instructor.residencia}</span>
-          </div>
+        ) : (
+          <p className="text-sm text-gray-400">No hay cursos asignados.</p>
+        )}
+      </Section>
+
+      {/* Comentarios */}
+      <Section title="Comentarios">
+        <p className="text-sm text-gray-600 italic">
+          {instructor.descripcion || "No hay comentarios disponibles."}
+        </p>
+      </Section>
+
+      {/* Documentación */}
+      <Section title="Documentación">
+        <div className="grid grid-cols-2 gap-4">
+          {["Fotografía", "INE", "Cédula", "RFC", "CURP"].map((doc) => (
+            <DocumentoCard key={doc} nombre={doc} />
+          ))}
         </div>
-        {/* 2. Información Académica */}
-        <div>
-          <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Información Académica</h4>
-          <div className="flex items-center text-gray-700">
-            <School className="w-5 h-5 mr-2 text-gray-500" />
-            <span className="font-semibold">Nivel:</span> {instructor.nivel_maximo_estudios}
-          </div>
-          <div className="flex items-center text-gray-700">
-            <GraduationCap className="w-5 h-5 mr-2 text-gray-500" />
-            <span className="font-semibold">Área:</span> {instructor.area_estudio}
-          </div>
-        </div>
-        {/* 3. Cursos que Imparte */}
-        <div>
-          <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Cursos que Imparte</h4>
-          {Object.keys(cursosAgrupados).length > 0 ? (
-            <div className="mt-4 space-y-4">
-              {Object.entries(cursosAgrupados).map(([campo, especialidades]: [string, any]) => (
-                <details key={campo} className="bg-gray-50 p-4 rounded-lg cursor-pointer">
-                  <summary className="flex items-center text-lg font-semibold text-gray-800">
-                    <ChevronRight className="w-5 h-5 mr-2" />
-                    {campo}
-                  </summary>
-                  <div className="ml-6 mt-2 space-y-2">
-                    {Object.entries(especialidades).map(([esp, cursos]: [string, any]) => (
-                      <details key={esp} className="p-2 rounded-lg cursor-pointer">
-                        <summary className="flex items-center font-medium text-gray-700">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          {esp}
-                        </summary>
-                        <ul className="list-inside ml-6 mt-1 text-sm text-gray-600">
-                          {cursos.map((item: any, idx: number) => (
-                            <li key={idx} className="flex justify-between items-center my-1">
-                              <span>{item.curso}</span>
-                              {/* Muestra el status del curso en un badge con color dinámico */}
-                              {item.status && (
-                                <span className={clsx("text-xs font-semibold px-2 py-1 rounded-full", getStatusColorClass(item.status))}>
-                                  {item.status}
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    ))}
-                  </div>
-                </details>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 mt-2">No hay cursos asignados a este instructor.</p>
-          )}
-        </div>
-        {/* 4. Comentarios */}
-        <div>
-          <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Comentarios</h4>
-          <p className="text-sm text-gray-600 italic mt-2">
-            {instructor.descripcion || "No hay comentarios disponibles."}
-          </p>
-        </div>
-        {/* 5. Documentación */}
-        <div>
-          <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Documentación</h4>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <DocumentoCard nombre="Fotografía" />
-            <DocumentoCard nombre="INE" />
-            <DocumentoCard nombre="Cédula" />
-            <DocumentoCard nombre="RFC" />
-            <DocumentoCard nombre="CURP" />
-          </div>
-          <button className="w-full text-center py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition mt-4">
-            <Download className="inline-block w-4 h-4 mr-2" />
-            Descargar Todo
-          </button>
-        </div>
-      </div>
+        <button className="w-full mt-4 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold transition">
+          <Download className="inline-block w-4 h-4 mr-2" />
+          Descargar Todo
+        </button>
+      </Section>
     </div>
   );
 };
 
-const DocumentoCard = ({ nombre }: { nombre: string }) => {
-  return (
-    <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition">
-      <span className="text-sm text-gray-700">{nombre}</span>
-      <Download className="w-4 h-4 text-gray-500" />
-    </div>
-  );
-};
+const Section = ({ title, children }: any) => (
+  <div>
+    <h4 className="text-xl font-bold text-gray-900 border-b pb-2 mb-3">{title}</h4>
+    {children}
+  </div>
+);
+
+const InfoItem = ({ icon, label, value }: any) => (
+  <div className="flex items-center text-gray-700 mb-1">
+    <span className="w-5 h-5 mr-2 text-gray-500">{icon}</span>
+    {label && <span className="font-semibold mr-1">{label}:</span>}
+    <span>{value}</span>
+  </div>
+);
+
+const DocumentoCard = ({ nombre }: { nombre: string }) => (
+  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+    <span className="text-sm text-gray-700">{nombre}</span>
+    <Download className="w-4 h-4 text-gray-500" />
+  </div>
+);
