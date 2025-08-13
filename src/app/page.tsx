@@ -1,3 +1,4 @@
+// src/app/instructores/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,10 +20,24 @@ import {
   Edit,
 } from "lucide-react";
 import clsx from "clsx";
-import { useRouter } from "next/navigation"; // ⬅️ Paso 1: Importa useRouter
+import { useRouter } from "next/navigation";
+
+// Función auxiliar para asignar colores basados en el status
+const getStatusColorClass = (status: string) => {
+  switch (status) {
+    case 'Maestría':
+      return 'bg-green-100 text-green-800';
+    case 'Doctorado':
+      return 'bg-purple-100 text-purple-800';
+    case 'Licenciatura':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-blue-100 text-blue-800'; // Color por defecto para otros status
+  }
+};
 
 export default function InstructorDirectoryUI() {
-  const router = useRouter(); // ⬅️ Paso 2: Inicializa el hook
+  const router = useRouter();
   const [instructores, setInstructores] = useState<any[]>([]);
   const [filtros, setFiltros] = useState({
     nombre: "",
@@ -106,23 +121,6 @@ export default function InstructorDirectoryUI() {
     }
   };
 
-  // Manejador para el botón "Dar de alta instructor"
-  const handleDarDeAlta = () => {
-    console.log("Clic en 'Dar de alta instructor', navegando a /admin");
-    // Redirige al usuario a la ruta del formulario de alta
-    router.push("/admin");
-  };
-
-  const handleEditarInstructor = () => {
-    if (instructorSeleccionado) {
-      console.log("Clic en 'Editar instructor' para:", instructorSeleccionado.id);
-      // Aquí podrías redirigir a un formulario de edición o mostrar un modal
-    } else {
-      console.log("Selecciona un instructor para editar");
-      // Aquí podrías mostrar una notificación al usuario
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
@@ -133,25 +131,6 @@ export default function InstructorDirectoryUI() {
             <div className="flex items-center gap-3">
               <Building2 className="w-8 h-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-800">Filtro de Instructores</h1>
-            </div>
-
-            {/* Botones agregados */}
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <button
-                onClick={handleDarDeAlta}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
-              >
-                <UserPlus className="w-5 h-5 mr-2" />
-                Dar de alta instructor
-              </button>
-              <button
-                onClick={handleEditarInstructor}
-                className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!instructorSeleccionado}
-              >
-                <Edit className="w-5 h-5 mr-2" />
-                Editar
-              </button>
             </div>
           </div>
 
@@ -287,21 +266,29 @@ const InstructorListItem = ({ instructor }: { instructor: any }) => {
   };
 
   return (
-    <div className="flex items-center">
-      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-        {getInitials(instructor.nombre_completo)}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center">
+        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
+          {getInitials(instructor.nombre_completo)}
+        </div>
+        <div className="ml-4">
+          <h3 className="font-semibold text-gray-800">{instructor.nombre_completo}</h3>
+          {instructor.sectores?.length > 0 && instructor.sectores[0]?.campo_formacion && (
+            <p className="text-sm text-gray-500">{instructor.sectores[0].campo_formacion}</p>
+          )}
+        </div>
       </div>
-      <div className="ml-4">
-        <h3 className="font-semibold text-gray-800">{instructor.nombre_completo}</h3>
-        {instructor.sectores?.length > 0 && instructor.sectores[0]?.campo_formacion && (
-          <p className="text-sm text-gray-500">{instructor.sectores[0].campo_formacion}</p>
-        )}
-      </div>
+      {/* LÍNEA MODIFICADA para mostrar el status en un badge con color dinámico */}
+      {instructor.sectores?.length > 0 && instructor.sectores[0]?.status && (
+        <span className={clsx("text-xs font-semibold px-2 py-1 rounded-full", getStatusColorClass(instructor.sectores[0].status))}>
+          {instructor.sectores[0].status}
+        </span>
+      )}
     </div>
   );
 };
 
-// Sub-componente para la vista de detalles con orden ajustado
+// Sub-componente para la vista de detalles
 const InstructorDetailView = ({ instructor }: { instructor: any }) => {
   const getInitials = (fullName: string) => {
     if (!fullName) return "JP";
@@ -313,8 +300,9 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
     return initials.toUpperCase();
   };
 
+  // Función para agrupar los cursos por campo de formación y especialidad
   const agruparCursos = (sectores: any[]) => {
-    if (!sectores || sectores.length === 0 || sectores[0] === null) return {};
+    if (!sectores || sectores.length === 0 || sectores[0]?.campo_formacion === null) return {};
     return sectores.reduce((acc, sector) => {
       const { campo_formacion, especialidad, curso } = sector;
       if (!acc[campo_formacion]) acc[campo_formacion] = {};
@@ -333,14 +321,13 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
           {getInitials(instructor.nombre_completo)}
         </div>
         <h3 className="text-2xl font-bold text-gray-800">{instructor.nombre_completo}</h3>
-        {instructor.sectores?.length > 0 && instructor.sectores[0]?.campo_formacion && (
-          <p className="text-lg text-gray-500">{instructor.sectores[0].campo_formacion}</p>
+        {/* Aquí se muestra el status en la vista de detalles del instructor con color dinámico */}
+        {instructor.sectores?.length > 0 && instructor.sectores[0]?.status && (
+          <p className={clsx("text-lg font-semibold", getStatusColorClass(instructor.sectores[0].status))}>
+            {instructor.sectores[0].status}
+          </p>
         )}
-        <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-          {instructor.status || "Formal"}
-        </span>
       </div>
-
       <div className="space-y-6">
         {/* 1. Información de Contacto */}
         <div>
@@ -362,7 +349,6 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
             <span>{instructor.residencia}</span>
           </div>
         </div>
-
         {/* 2. Información Académica */}
         <div>
           <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Información Académica</h4>
@@ -375,7 +361,6 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
             <span className="font-semibold">Área:</span> {instructor.area_estudio}
           </div>
         </div>
-
         {/* 3. Cursos que Imparte */}
         <div>
           <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Cursos que Imparte</h4>
@@ -394,9 +379,11 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
                           <ChevronRight className="w-4 h-4 mr-2" />
                           {esp}
                         </summary>
-                        <ul className="list-disc list-inside ml-6 mt-1 text-sm text-gray-600">
+                        <ul className="list-inside ml-6 mt-1 text-sm text-gray-600">
                           {cursos.map((curso: string, idx: number) => (
-                            <li key={idx}>{curso}</li>
+                            <li key={idx} className="my-1">
+                              <span>{curso}</span>
+                            </li>
                           ))}
                         </ul>
                       </details>
@@ -409,7 +396,6 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
             <p className="text-sm text-gray-400 mt-2">No hay cursos asignados a este instructor.</p>
           )}
         </div>
-
         {/* 4. Comentarios */}
         <div>
           <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Comentarios</h4>
@@ -417,7 +403,6 @@ const InstructorDetailView = ({ instructor }: { instructor: any }) => {
             {instructor.descripcion || "No hay comentarios disponibles."}
           </p>
         </div>
-
         {/* 5. Documentación */}
         <div>
           <h4 className="text-xl font-bold text-gray-800 border-b pb-2">Documentación</h4>
