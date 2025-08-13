@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -39,3 +40,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 # filtroDeInstructoresIcapet
 proyecto de filtro de instructores
 >>>>>>> ea6e91d530ab216b447deaceac262f64d4b1b68f
+=======
+# ICAPET_proyecto_2025
+proyecto de filtro de instructores con la base de datos inicio de session
+>>>>>>> d4e9c98dc6fe79becdd5f241e75bebb018760655
