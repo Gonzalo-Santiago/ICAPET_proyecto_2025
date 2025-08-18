@@ -1,3 +1,8 @@
+/**
+ * autor: max
+ * fecha de inicio: 14 de julio del 2025
+ * Descripción: es la interfaz principal
+ */
 // src\app\page.tsx
 'use client';
 

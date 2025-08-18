@@ -1,3 +1,10 @@
+/**
+ *autor: maximiliano pacheco perez
+ * fecha de inicio 12 de agosto
+ * Descripción: interfaz de logueo para la aplicacion web filtro de instructores......
+ */
+
+
 // src\app\api\login\route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
