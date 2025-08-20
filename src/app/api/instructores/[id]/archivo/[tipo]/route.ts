@@ -29,10 +29,10 @@ const MAP: Record<string, { col: string; mime: string }> = {
 
 export async function GET(
   req: Request,
-  context: { params: { id: string; tipo: string } }
+  { params }: { params: Promise<{ id: string; tipo: string }> }
 ) {
   try {
-    const { id, tipo } = context.params;
+    const { id, tipo } = await params; 
     const m = MAP[tipo?.toLowerCase()];
     if (!m) return NR.json({ error: "Tipo de archivo inválido" }, { status: 400 });
 
