@@ -1,3 +1,4 @@
+// src\app\admin\editar-instructor\page.tsx
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -52,6 +53,7 @@ export default function EditarInstructor() {
   const [msg, setMsg] = useState('');
   const [isError, setIsError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Descargas: construir URLs de descarga de blobs por tipo
   const downloadUrls = useMemo(() => {
@@ -202,6 +204,29 @@ export default function EditarInstructor() {
     } finally { setSubmitting(false); }
   };
 
+  const onDelete = async () => {
+    if (!selectedInstructorId || !window.confirm('¿Estás seguro de que quieres eliminar este instructor? Esta acción es irreversible.')) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const r = await fetch(`/api/instructores/${selectedInstructorId}`, { method: 'DELETE' });
+      if (!r.ok) {
+        const er = await r.json().catch(() => ({}));
+        throw new Error(er.message || 'Error al eliminar');
+      }
+      setMsg('Instructor eliminado');
+      setIsError(false);
+      setTimeout(() => router.push('/admin'), 800);
+    } catch (e: any) {
+      console.error(e);
+      setMsg(e.message || 'Error al eliminar');
+      setIsError(true);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">Cargando…</div>
@@ -305,8 +330,16 @@ export default function EditarInstructor() {
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={deleting || submitting}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white disabled:opacity-50"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </button>
+            <button type="submit" disabled={submitting || deleting} className="px-4 py-2 rounded-lg bg-indigo-600 text-white disabled:opacity-50">{submitting ? 'Guardando…' : 'Guardar cambios'}</button>
             <Link href="/admin" className="px-4 py-2 border rounded-lg">Cancelar</Link>
-            <button type="submit" disabled={submitting} className="px-4 py-2 rounded-lg bg-indigo-600 text-white disabled:opacity-50">{submitting? 'Guardando…':'Guardar cambios'}</button>
           </div>
         </form>
       </div>
