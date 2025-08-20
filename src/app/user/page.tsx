@@ -310,6 +310,36 @@ const InstructorDetailView = ({ instructor }: { instructor: Instructor }) => {
 
   const cursosAgrupados = agruparCursos(instructor.sectores);
 
+  const handleDescargarTodo = async () => {
+    const nombreArchivo = `instructor_${instructor.nombre_completo.replace(/\s+/g, "_")}`;
+    const url = `/api/instructores/${instructor.id}/archivo/zip`;
+
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(`Error al generar ZIP: ${errorText}`);
+        return;
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `${nombreArchivo}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error al descargar ZIP:", error);
+      alert("Ocurrió un error inesperado al intentar descargar los archivos.");
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       {/* Encabezado */}
@@ -387,11 +417,25 @@ const InstructorDetailView = ({ instructor }: { instructor: Instructor }) => {
       {/* Documentación */}
       <Section title="Documentación">
         <div className="grid grid-cols-2 gap-4">
-          {["Fotografía", "INE", "Cédula", "RFC", "CURP"].map((doc) => (
-            <DocumentoCard key={doc} nombre={doc} />
+          {[
+            { nombre: "Fotografía", tipo: "fotografia" },
+            { nombre: "INE", tipo: "ine" },
+            { nombre: "Cédula", tipo: "cedula" },
+            { nombre: "RFC", tipo: "rfc" },
+            { nombre: "CURP", tipo: "curp" },
+          ].map((doc) => (
+            <DocumentoCard
+              key={doc.tipo}
+              nombre={doc.nombre}
+              tipo={doc.tipo}
+              idInstructor={instructor.id}
+            />
           ))}
         </div>
-        <button className="w-full mt-4 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold transition">
+        <button
+          onClick={handleDescargarTodo}
+          className="w-full mt-4 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold transition"
+        >
           <Download className="inline-block w-4 h-4 mr-2" />
           Descargar Todo
         </button>
@@ -415,9 +459,27 @@ const InfoItem = ({ icon, label, value }: any) => (
   </div>
 );
 
-const DocumentoCard = ({ nombre }: { nombre: string }) => (
-  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-    <span className="text-sm text-gray-700">{nombre}</span>
-    <Download className="w-4 h-4 text-gray-500" />
-  </div>
-);
+const DocumentoCard = ({
+  nombre,
+  tipo,
+  idInstructor,
+}: {
+  nombre: string;
+  tipo: string;
+  idInstructor: number;
+}) => {
+  const handleDescarga = () => {
+    const url = `/api/instructores/${idInstructor}/archivo/${tipo}`;
+    window.open(url, "_blank");
+  };
+
+  return (
+    <button
+      onClick={handleDescarga}
+      className="flex items-center justify-between w-full p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+    >
+      <span className="text-sm text-gray-700">{nombre}</span>
+      <Download className="w-4 h-4 text-gray-500" />
+    </button>
+  );
+};
