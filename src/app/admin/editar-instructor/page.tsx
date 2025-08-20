@@ -1,4 +1,4 @@
-// src\app\admin\editar-instructor\page.tsx
+// \\src\app\admin\editar-instructor\page.tsx
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
