@@ -11,7 +11,7 @@ interface Sector {
 }
 
 const STATUS_OPTIONS = [
-  "Experto Impírico",
+  "Experto Empírico",
   "Experto con educación NO formal",
   "Experto con Educación formal",
   "Licenciatura",
@@ -41,7 +41,7 @@ export default function Home() {
   const [selectedFormacion, setSelectedFormacion] = useState("");
   const [selectedEspecialidad, setSelectedEspecialidad] = useState("");
   const [selectedCurso, setSelectedCurso] = useState("");
-  const [statusSector, setStatusSector] = useState<StatusType>("Experto Impírico");
+  const [statusSector, setStatusSector] = useState<StatusType>("Experto Empírico");
 
   useEffect(() => {
     async function fetchSectores() {
@@ -202,7 +202,7 @@ export default function Home() {
                     setSelectedFormacion("");
                     setSelectedEspecialidad("");
                     setSelectedCurso("");
-                    setStatusSector("Experto Impírico");
+                    setStatusSector("Experto Empírico");
                   }
                 }}
                 className="btn-sm bg-blue-600 text-white px-4 py-1 rounded"
