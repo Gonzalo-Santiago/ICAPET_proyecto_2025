@@ -226,7 +226,7 @@ const EditarSectorPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center font-sans">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all duration-500 hover:scale-105">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-6 text-center">
           Editar Sector
         </h1>

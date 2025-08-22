@@ -1,4 +1,7 @@
 // src/app/api/instructores/route.ts
+/**
+ * Funciones para los buscadores en el page de user
+ */
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -143,9 +146,10 @@ export async function GET(req: Request) {
     }
 
     if (curso !== "Todos los cursos") {
-      conditions.push("S.curso = ?");
-      values.push(curso);
+      conditions.push("S.curso LIKE ?");
+      values.push(`%${curso}%`);
     }
+
 
     if (conditions.length > 0) {
       query += " WHERE " + conditions.join(" AND ");

@@ -31,14 +31,14 @@ export async function GET(
         I.FOTOGRAFIA,
         I.CURP,
         JSON_ARRAYAGG(
-  JSON_OBJECT(
-    'id', S.id,
-    'campo_formacion', S.campo_formacion,
-    'especialidad', S.especialidad,
-    'curso', S.curso,
-    'status', ISX.status
-  )
-) AS sectores_json
+          JSON_OBJECT(
+            'id', S.id,
+            'campo_formacion', S.campo_formacion,
+            'especialidad', S.especialidad,
+            'curso', S.curso,
+            'status', ISX.status
+          )
+        ) AS sectores_json
       FROM INSTRUCTORES I
       LEFT JOIN INSTRUCTOR_SECTOR ISX ON I.id = ISX.id_instructor
       LEFT JOIN SECTOR S ON ISX.id_sector = S.id

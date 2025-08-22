@@ -39,7 +39,7 @@ export default function InstructorDirectoryUI() {
     comentario: "", // <-- Esto soluciona el warning
     campo_formacion: "Todos los campos",
     especialidad: "Todas las especialidades",
-    curso: "Todos los cursos",
+    curso: "",
   });
   const [opciones, setOpciones] = useState({
     campo_formacion: [] as string[],
@@ -136,6 +136,17 @@ export default function InstructorDirectoryUI() {
               onChange={handleFiltroChange}
               placeholder="E.g. Juan Pérez..."
             />
+
+            <FiltroInput
+              icon={<Search className="w-4 h-4 text-gray-400" />}
+              label="Buscar por Curso"
+              name="curso"
+              value={filtros.curso}
+              onChange={handleFiltroChange}
+              placeholder="Ej. Panadería..."
+            />
+
+
             <FiltroInput
               icon={<Search className="w-4 h-4 text-gray-400" />}
               label="Buscar por Comentario"
