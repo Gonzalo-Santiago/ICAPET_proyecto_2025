@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRef } from "react";
+
 import {
   Search,
   Building2,
@@ -33,6 +35,7 @@ const getStatusColorClass = (status: string) => {
 
 export default function InstructorDirectoryUI() {
   const router = useRouter();
+  const detallesRef = useRef<HTMLDivElement>(null);
   const [instructores, setInstructores] = useState<any[]>([]);
   const [filtros, setFiltros] = useState({
     nombre: "",
@@ -98,11 +101,27 @@ export default function InstructorDirectoryUI() {
     });
   };
 
+  /*const handleSeleccionarInstructor = async (id: number) => {
+    const res = await fetch(`/api/instructores/${id}`);
+    if (res.ok) {
+      const data = await res.json();
+      setInstructorSeleccionado(data);
+    } else {
+      console.error("Error al obtener detalles del instructor:", res.statusText);
+      setInstructorSeleccionado(null);
+    }
+  };*/
+
   const handleSeleccionarInstructor = async (id: number) => {
     const res = await fetch(`/api/instructores/${id}`);
     if (res.ok) {
       const data = await res.json();
       setInstructorSeleccionado(data);
+
+      // Hacer scroll suave al contenedor de detalles
+      setTimeout(() => {
+        detallesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100); // Espera un poco a que el componente se actualice
     } else {
       console.error("Error al obtener detalles del instructor:", res.statusText);
       setInstructorSeleccionado(null);
@@ -183,7 +202,7 @@ export default function InstructorDirectoryUI() {
         </div>
 
         {/* Contenido principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Lista de instructores */}
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
             <h2 className="text-xl font-bold mb-4 text-gray-900">
@@ -214,7 +233,10 @@ export default function InstructorDirectoryUI() {
           </div>
 
           {/* Detalles */}
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 lg:col-span-2">
+          <div
+            ref={detallesRef}
+            className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 lg:col-span-2"
+          >
             {instructorSeleccionado ? (
               <InstructorDetailView instructor={instructorSeleccionado} />
             ) : (
