@@ -90,6 +90,15 @@ export default function Home() {
     if (isSaving) return; // evitar múltiples envíos
     setIsSaving(true);
 
+    // ✅ Validar que al menos un sector esté seleccionado
+    if (sectoresSeleccionados.length === 0) {
+      alert("Debe seleccionar al menos un sector antes de guardar.");
+      return;
+    }
+
+    setIsSaving(true);
+
+
     const data = new FormData();
 
     for (const key in form) {
@@ -172,7 +181,7 @@ export default function Home() {
               name="apellido_materno"
               placeholder="Apellido Materno"
               className="input"
-              required
+              //required
               onChange={handleChange}
               value={form.apellido_materno}
             />
@@ -181,7 +190,7 @@ export default function Home() {
               placeholder="Correo Electrónico"
               type="email"
               className="input"
-              required
+              //required
               onChange={handleChange}
               value={form.email}
             />
@@ -189,6 +198,7 @@ export default function Home() {
               name="telefono"
               placeholder="Teléfono"
               className="input"
+              required
               onChange={handleChange}
               value={form.telefono}
             />
@@ -196,6 +206,7 @@ export default function Home() {
               name="nivel_estudio"
               placeholder="Nivel de Estudio"
               className="input"
+              required
               onChange={handleChange}
               value={form.nivel_estudio}
             />
@@ -203,6 +214,7 @@ export default function Home() {
               name="area_estudio"
               placeholder="Área de Estudio"
               className="input"
+              required
               onChange={handleChange}
               value={form.area_estudio}
             />
@@ -210,6 +222,7 @@ export default function Home() {
               name="UDC"
               placeholder="UDC"
               className="input"
+              required
               onChange={handleChange}
               value={form.UDC}
             />
@@ -217,6 +230,7 @@ export default function Home() {
               name="residencia"
               placeholder="Residencia"
               className="input"
+              required
               onChange={handleChange}
               value={form.residencia}
             />
@@ -407,7 +421,7 @@ export default function Home() {
                     type="file"
                     accept={field === "fotografia" ? "image/png, image/jpeg, image/jpg" : "application/pdf"}
                     onChange={handleChange}
-                    required
+                    //required
                     ref={ref}
                   />
                 </div>

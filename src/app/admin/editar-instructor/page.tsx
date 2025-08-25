@@ -177,12 +177,12 @@ export default function EditarInstructor() {
     try {
       const fd = new FormData();
       // Solo enviar archivos si son File (para no sobreescribir innecesariamente)
-      (['rfc','curp','cedula','ine','fotografia'] as const).forEach((k) => {
+      (['rfc', 'curp', 'cedula', 'ine', 'fotografia'] as const).forEach((k) => {
         const v: any = (form as any)[k];
         if (v instanceof File) fd.append(k, v);
       });
       // Campos de texto
-      const keys: (keyof Instructor)[] = ['nombre','apellido_paterno','apellido_materno','email','telefono','comentario','nivel_estudio','area_estudio','UDC','residencia'];
+      const keys: (keyof Instructor)[] = ['nombre', 'apellido_paterno', 'apellido_materno', 'email', 'telefono', 'comentario', 'nivel_estudio', 'area_estudio', 'UDC', 'residencia'];
       for (const k of keys) {
         const v = (form as any)[k];
         fd.append(k as string, v ?? '');
@@ -246,7 +246,7 @@ export default function EditarInstructor() {
         {/* Selector de instructor */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-1">Seleccionar Instructor</label>
-          <select value={selectedInstructorId} onChange={(e)=>setSelectedInstructorId(e.target.value)} className="w-full border rounded-lg p-2">
+          <select value={selectedInstructorId} onChange={(e) => setSelectedInstructorId(e.target.value)} className="w-full border rounded-lg p-2">
             <option value="">-- Seleccionar --</option>
             {instructores.map((i) => (
               <option key={i.id} value={i.id}>{`${i.nombre} ${i.apellido_paterno} ${i.apellido_materno}`}</option>
@@ -259,8 +259,8 @@ export default function EditarInstructor() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <input className="border rounded-lg p-3" placeholder="Nombre" name="nombre" value={form.nombre} onChange={onChangeText} required />
             <input className="border rounded-lg p-3" placeholder="Apellido paterno" name="apellido_paterno" value={form.apellido_paterno} onChange={onChangeText} required />
-            <input className="border rounded-lg p-3" placeholder="Apellido materno" name="apellido_materno" value={form.apellido_materno} onChange={onChangeText} required />
-            <input className="border rounded-lg p-3" placeholder="Email" type="email" name="email" value={form.email} onChange={onChangeText} required />
+            <input className="border rounded-lg p-3" placeholder="Apellido materno" name="apellido_materno" value={form.apellido_materno} onChange={onChangeText} />
+            <input className="border rounded-lg p-3" placeholder="Email" type="email" name="email" value={form.email} onChange={onChangeText}  />
             <input className="border rounded-lg p-3" placeholder="Teléfono" name="telefono" value={form.telefono} onChange={onChangeText} />
             <input className="border rounded-lg p-3" placeholder="Nivel de estudio" name="nivel_estudio" value={form.nivel_estudio} onChange={onChangeText} />
             <input className="border rounded-lg p-3" placeholder="Área de estudio" name="area_estudio" value={form.area_estudio} onChange={onChangeText} />
@@ -273,39 +273,51 @@ export default function EditarInstructor() {
           <div>
             <h2 className="text-xl font-semibold mb-3">Documentos</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(['rfc','curp','cedula','ine','fotografia'] as const).map((k) => (
+              {(['rfc', 'curp', 'cedula', 'ine', 'fotografia'] as const).map((k) => (
                 <div key={k} className="border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium uppercase">{k}</span>
                     {form.id && (
-                      <a className="text-sm text-blue-600 hover:underline" href={(downloadUrls as any)[k]}>
+                      <a
+                        className="text-sm text-blue-600 hover:underline"
+                        href={(downloadUrls as any)[k]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Descargar
                       </a>
                     )}
                   </div>
-                  <input name={k} type="file" onChange={onChangeFile} accept={k==='fotografia' ? 'image/*,application/pdf' : 'application/pdf'} className="block w-full text-sm" />
+                  <input
+                    name={k}
+                    type="file"
+                    onChange={onChangeFile}
+                    accept={k === 'fotografia' ? 'image/*,application/pdf' : 'application/pdf'}
+                    className="block w-full text-sm"
+                  />
                 </div>
               ))}
             </div>
           </div>
 
+
           {/* Sectores */}
           <div>
             <h2 className="text-xl font-semibold mb-3">Sectores</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <select value={filtroFormacion} onChange={(e)=>{setFiltroFormacion(e.target.value); setFiltroEspecialidad(''); setFiltroCurso('');}} className="border rounded-lg p-2">
+              <select value={filtroFormacion} onChange={(e) => { setFiltroFormacion(e.target.value); setFiltroEspecialidad(''); setFiltroCurso(''); }} className="border rounded-lg p-2">
                 <option value="">Campo de formación</option>
-                {formaciones.map((v)=> <option key={v} value={v}>{v}</option>)}
+                {formaciones.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
-              <select value={filtroEspecialidad} onChange={(e)=>{setFiltroEspecialidad(e.target.value); setFiltroCurso('');}} className="border rounded-lg p-2" disabled={!filtroFormacion}>
+              <select value={filtroEspecialidad} onChange={(e) => { setFiltroEspecialidad(e.target.value); setFiltroCurso(''); }} className="border rounded-lg p-2" disabled={!filtroFormacion}>
                 <option value="">Especialidad</option>
-                {especialidades.map((v)=> <option key={v} value={v}>{v}</option>)}
+                {especialidades.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
-              <select value={filtroCurso} onChange={(e)=>setFiltroCurso(e.target.value)} className="border rounded-lg p-2" disabled={!filtroEspecialidad}>
+              <select value={filtroCurso} onChange={(e) => setFiltroCurso(e.target.value)} className="border rounded-lg p-2" disabled={!filtroEspecialidad}>
                 <option value="">Curso</option>
-                {cursos.map((v)=> <option key={v} value={v}>{v}</option>)}
+                {cursos.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
-              <select value={statusNew} onChange={(e)=>setStatusNew(e.target.value as StatusType)} className="border rounded-lg p-2">
+              <select value={statusNew} onChange={(e) => setStatusNew(e.target.value as StatusType)} className="border rounded-lg p-2">
                 {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -318,10 +330,10 @@ export default function EditarInstructor() {
                   <li key={s.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white rounded-lg p-3 border">
                     <div className="font-medium">{`${s.campo_formacion} / ${s.especialidad} / ${s.curso}`}</div>
                     <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                      <select className="border rounded-lg p-1 text-sm" value={s.status} onChange={(e)=>setSectoresSel((arr)=>arr.map(x=>x.id===s.id?{...x,status:e.target.value as StatusType}:x))}>
+                      <select className="border rounded-lg p-1 text-sm" value={s.status} onChange={(e) => setSectoresSel((arr) => arr.map(x => x.id === s.id ? { ...x, status: e.target.value as StatusType } : x))}>
                         {STATUS_OPTIONS.map(st => <option key={st} value={st}>{st}</option>)}
                       </select>
-                      <button type="button" onClick={()=>eliminarSector(s.id)} className="text-red-600 text-sm">Quitar</button>
+                      <button type="button" onClick={() => eliminarSector(s.id)} className="text-red-600 text-sm">Quitar</button>
                     </div>
                   </li>
                 ))}
