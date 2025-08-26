@@ -204,7 +204,7 @@ export default function InstructorDirectoryUI() {
         {/* Contenido principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Lista de instructores */}
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-[1300px] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4 text-gray-900">
               Total de Instructores ({instructores.length})
             </h2>
