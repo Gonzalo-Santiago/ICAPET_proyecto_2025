@@ -1,9 +1,11 @@
 // \\src\app\admin\editar-instructor\page.tsx
-'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from "react";
 
 // Tipos
 interface Sector { id: number; campo_formacion: string; especialidad: string; curso: string; }
@@ -29,9 +31,10 @@ const STATUS_OPTIONS = [
 
 type StatusType = typeof STATUS_OPTIONS[number];
 
-export default function EditarInstructor() {
+
+function EditarInstructorContent() {
   const sp = useSearchParams();
-  const routeId = sp.get('id') ?? '';
+  const routeId = sp.get("id") ?? "";
   const router = useRouter();
 
   const [instructores, setInstructores] = useState<Instructor[]>([]);
@@ -356,5 +359,13 @@ export default function EditarInstructor() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Cargando página...</div>}>
+      <EditarInstructorContent />
+    </Suspense>
   );
 }
